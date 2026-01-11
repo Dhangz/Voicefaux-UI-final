@@ -1,0 +1,68 @@
+# =========================
+# Python / Django
+# =========================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django database
+*.sqlite3
+db.sqlite3
+
+# Django media & static
+media/
+staticfiles/
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+venv/
+env/
+ENV/
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage reports
+.coverage
+.coverage.*
+htmlcov/
+
+# =========================
+# Node / React
+# =========================
+# Node modules
+node_modules/
+
+# Build output
+build/
+dist/
+
+# React / Next.js
+.next/
+out/
+
+# Yarn
+yarn-error.log
+yarn-debug.log*
+
+# npm
+package-lock.json
+
+# =========================
+# IDEs / Editors
+# =========================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
