@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import classify_audio, model_info
+from .views import classify_audio, classify_batch_audio
 
 urlpatterns = [
     path('classify/', classify_audio, name='classify_audio'),
-    path('model-info/', model_info, name='model_info'),
+    path('classify-batch/', classify_batch_audio, name='classify_batch_audio'),
 ]

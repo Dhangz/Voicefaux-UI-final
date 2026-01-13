@@ -4,10 +4,11 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import AudioUploadSerializer
+from .serializers import AudioUploadSerializer, BatchAudioUploadSerializer
 from .efficientNet_model import predict_audio
 
 import torch
+import traceback
 from .efficientNet_model import device, CLASS_NAMES, SR, DURATION
 
 @api_view(['POST'])
@@ -72,24 +73,91 @@ def classify_audio(request):
         status=status.HTTP_400_BAD_REQUEST
     )
 
-@api_view(['GET'])
-def model_info(request):
+
+@api_view(['POST'])
+def classify_batch_audio(request):
     """
-    Get model information
+    Batch audio classification endpoint
     
-    GET /api/model-info/
+    POST /api/classify-batch/
+    Body: multipart/form-data with 'audio_files' field (multiple files)
+    
+    Returns:
+        {
+            "success": true,
+            "data": {
+                "total_files": 3,
+                "successful": 3,
+                "failed": 0,
+                "results": [
+                    {
+                        "filename": "audio1.wav",
+                        "predicted_class": "synthetic",
+                        "confidence": 0.95,
+                        "all_probabilities": {
+                            "modified": 2.15,
+                            "unmodified": 1.23,
+                            "synthetic": 95.42,
+                            "spliced": 1.20
+                        }
+                    },
+                    ...
+                ],
+                "errors": []
+            }
+        }
     """
+    serializer = BatchAudioUploadSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        audio_files = serializer.validated_data['audio_files']
+        
+        results = []
+        errors = []
+        successful = 0
+        failed = 0
+        
+        for audio_file in audio_files:
+            try:
+                # Perform classification for each file
+                result = predict_audio(audio_file)
+                
+                # Add filename to result
+                result['filename'] = audio_file.name
+                results.append(result)
+                successful += 1
+                
+            except Exception as e:
+                # Log the error but continue processing other files
+                error_msg = f"Failed to process {audio_file.name}: {str(e)}"
+                print(f"❌ {error_msg}")
+                print(traceback.format_exc())
+                
+                errors.append({
+                    "filename": audio_file.name,
+                    "error": str(e)
+                })
+                failed += 1
+        
+        return Response(
+            {
+                "success": True,
+                "data": {
+                    "total_files": len(audio_files),
+                    "successful": successful,
+                    "failed": failed,
+                    "results": results,
+                    "errors": errors
+                }
+            }, 
+            status=status.HTTP_200_OK
+        )
     
     return Response(
         {
-            "model_architecture": "ResNet50",
-            "num_classes": len(CLASS_NAMES),
-            "classes": CLASS_NAMES,
-            "device": str(device),
-            "cuda_available": torch.cuda.is_available(),
-            "sample_rate": SR,
-            "audio_duration": DURATION,
-            "input_format": "audio files (.wav only)"
-        },
-        status=status.HTTP_200_OK
+            "success": False,
+            "errors": serializer.errors
+        }, 
+        status=status.HTTP_400_BAD_REQUEST
     )
+
