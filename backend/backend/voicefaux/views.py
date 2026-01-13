@@ -5,10 +5,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import AudioUploadSerializer
-from .ml_model import predict_audio
+from .efficientNet_model import predict_audio
 
 import torch
-from .ml_model import device, CLASS_NAMES, SR, DURATION
+from .efficientNet_model import device, CLASS_NAMES, SR, DURATION
 
 @api_view(['POST'])
 def classify_audio(request):

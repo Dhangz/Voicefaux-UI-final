@@ -99,9 +99,6 @@ const clearAll = () => {
           </p>
         )}
 
-        {isLoading && <p className="text-blue-500 mt-2">Classifying audio...</p>}
-        {error && <p className="text-red-500 mt-2">{error}</p>}
-
         <button className="btn btn-secondary w-full cursor-pointer mt-2" onClick={clearAll}>
           Clear Audio
         </button>
